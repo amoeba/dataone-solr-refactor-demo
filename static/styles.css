@@ -1,0 +1,26 @@
+body {
+  margin: 0;
+  padding: 1rem;
+  font-family: -apple-system, sans-serif;
+  width: 600px;
+}
+
+th,
+td {
+  padding: 0.25rem 0.5rem;
+}
+
+pre {
+  margin-left: 1.5rem;
+}
+
+.controls {
+  display: flex;
+  margin: 0.5rem;
+}
+
+.controls > div {
+  margin-right: 0rem;
+  width: 5rem;
+  text-align: center;
+}
