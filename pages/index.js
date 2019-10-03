@@ -60,7 +60,7 @@ const Home = ({qtime, docs}) => (
       {docs.map((doc) => (
         <li key={doc.id}>
           <Link href="/metadata/[doc.id]" as={`/metadata/${doc.id}`}>
-            <a>{doc.id}</a>
+            <a>{doc.id}: {doc.name}</a>
           </Link>
         </li>
       ))}
