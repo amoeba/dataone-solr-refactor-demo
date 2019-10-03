@@ -12,7 +12,7 @@ const find_package_members_url = ( pid, start ) => {
   return 'http://localhost:8983/solr/objects/select/?q={!join%20from=members%20to=id}id:'+pid+'&wt=json&start=' + start + '&sort=type+desc,id+asc'
 }
 
-const Metadata = ({ n, members }) => {
+const Metadata = ({ query, qtime, n, members }) => {
   const router = useRouter()
   const { pid, page } = router.query
 
@@ -24,6 +24,9 @@ const Metadata = ({ n, members }) => {
     <Nav />
     <h2>Dataset: {pid}</h2>
     <h3>Package Members ({n} Total)</h3>
+
+    <p>Query: <code>{query}</code></p>
+    <p>QTime: <code>{qtime}</code></p>
 
     <PageControls n={n} page={page}/>
 
@@ -67,6 +70,8 @@ Metadata.getInitialProps = async ( req ) => {
   const pkgjson = await pkgres.json()
 
   return {
+    query: find_package_members_url(package_pid, start),
+    qtime: pkgjson.responseHeader.QTime,
     n: pkgjson.response.numFound,
     members: pkgjson.response.docs
   }
