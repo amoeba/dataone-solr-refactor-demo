@@ -12,11 +12,11 @@ const find_package_members_url = ( pid, start ) => {
   return 'http://localhost:8983/solr/objects/select/?q={!join%20from=members%20to=id}id:'+pid+'&wt=json&start=' + start + '&sort=type+desc,id+asc'
 }
 
-const find_provenance = ( pid ) => {
-  return 'http://localhost:8983/solr/relationships/select/?q=id:' + pid
+const find_relationships = ( pid ) => {
+  return 'http://localhost:8983/solr/relationships/select/?q=package_id:' + pid
 }
 
-const Metadata = ({ query, qtime, n, members, provenance }) => {
+const Metadata = ({ n, members, relationships }) => {
   const router = useRouter()
   const { pid, page } = router.query
 
@@ -27,18 +27,13 @@ const Metadata = ({ query, qtime, n, members, provenance }) => {
     </Head>
     <Nav />
     <h2>Dataset: {pid}</h2>
-    <h3>Package Members ({n} Total)</h3>
-
-    <p>Query: <code>{query}</code></p>
-    <p>QTime: <code>{qtime}</code></p>
-
-    <PageControls n={n} page={page}/>
 
     <Link href="/metadata/[doc.id]">
       <a href="" />
     </Link>
 
-    <h3>Files</h3>
+    <h3>Files ({n} total)</h3>
+    <PageControls n={n} page={page}/>
 
     <table>
       <thead>
@@ -62,7 +57,6 @@ const Metadata = ({ query, qtime, n, members, provenance }) => {
     </table>
 
     <h3>Provenance</h3>
-
     <table>
       <thead>
         <tr>
@@ -73,8 +67,33 @@ const Metadata = ({ query, qtime, n, members, provenance }) => {
       </thead>
       <tbody>
         {
-          provenance
+          relationships
             .filter((doc) => { return doc.type === "provenance" })
+            .map((doc) => (
+              <tr key={doc.id}>
+                <td>{doc.subject}</td>
+                <td>{doc.predicate}</td>
+                <td>{doc.object}</td>
+              </tr>
+            )
+          )
+        }
+      </tbody>
+    </table>
+
+    <h3>Other relationships</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Subject</th>
+          <th>Predicate</th>
+          <th>Object</th>
+        </tr>
+      </thead>
+      <tbody>
+        {
+          relationships
+            .filter((doc) => { return doc.type !== "provenance" })
             .map((doc) => (
               <tr key={doc.id}>
                 <td>{doc.subject}</td>
@@ -101,16 +120,14 @@ Metadata.getInitialProps = async ( req ) => {
   const pkgres = await fetch(find_package_members_url(package_pid, start))
   const pkgjson = await pkgres.json()
 
-  // Find provenance
-  const provres = await fetch(find_provenance(package_pid))
-  const provjson = await provres.json()
+  // Find relationships
+  const relationshipres = await fetch(find_relationships(package_pid))
+  const relationshipjson = await relationshipres.json()
 
   return {
-    query: find_package_members_url(package_pid, start),
-    qtime: pkgjson.responseHeader.QTime,
     n: pkgjson.response.numFound,
     members: pkgjson.response.docs,
-    provenance: provjson.response.docs
+    relationships: relationshipjson.response.docs
   }
 }
 
