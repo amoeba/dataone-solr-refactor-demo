@@ -18,7 +18,7 @@ const find_relationships = (pid, start) => {
   return `http://localhost:8983/solr/relationships/select/?q=package_id:${pid}&start=${start}&sort=id+asc&wt=json`
 }
 
-const Metadata = ({ n, members, relationships }) => {
+const Metadata = ({ n, members, relationships, qtimes }) => {
   const router = useRouter()
   const { pid, page, rpage } = router.query
   return <div>
@@ -83,16 +83,20 @@ const Metadata = ({ n, members, relationships }) => {
         }
       </tbody>
     </table>
+    <p>Queries returned in {JSON.stringify(qtimes)}ms</p>
   </div>
 }
 
 export default Metadata
 
 export async function getServerSideProps(context) {
+  let qtimes = []
+
   // Find package
   const metadata_pid = context.query.pid
   const res = await fetch(find_package_url(metadata_pid), fetch_options)
   const json = await res.json()
+  qtimes.push(json.responseHeader.QTime)
 
   const start = ((context.query.page ? context.query.page : 1) - 1) * 10
   const relationship_start = ((context.query.rpage ? context.query.rpage : 1) - 1) * 10
@@ -101,16 +105,19 @@ export async function getServerSideProps(context) {
   const package_pid = json.response.docs[0].id
   const pkgres = await fetch(find_package_members_url(package_pid, start), fetch_options)
   const pkgjson = await pkgres.json()
+  qtimes.push(pkgjson.responseHeader.QTime)
 
   // Find relationships
   const relationshipres = await fetch(find_relationships(package_pid, relationship_start), fetch_options)
   const relationshipjson = await relationshipres.json()
+  qtimes.push(relationshipjson.responseHeader.QTime)
 
   return {
     props: {
       n: pkgjson.response.numFound,
       members: pkgjson.response.docs,
-      relationships: typeof relationshipjson.response === "undefined" ? [] : relationshipjson.response.docs
+      relationships: typeof relationshipjson.response === "undefined" ? [] : relationshipjson.response.docs,
+      qtimes: qtimes
     }
   }
 }

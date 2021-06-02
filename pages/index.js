@@ -27,7 +27,7 @@ const solr_content_example = JSON.stringify([
 
 const query_example = '?q={!join from=members to=id}id:{package_id}'
 
-const Home = ({ n, docs }) => {
+const Home = ({ n, docs, qtime }) => {
   const router = useRouter()
   const { page } = router.query;
 
@@ -67,6 +67,7 @@ const Home = ({ n, docs }) => {
         </li>
       ))}
     </ul>
+    <p>Query returned in {qtime}ms</p>
   </div>
 }
 
@@ -81,6 +82,7 @@ export async function getServerSideProps(context) {
     props: {
       n: json.response.numFound,
       docs: typeof json.response === "undefined" ? [] : json.response.docs,
+      qtime: JSON.stringify(json.responseHeader.QTime)
     }
   }
 }
