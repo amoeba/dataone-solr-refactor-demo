@@ -56,7 +56,7 @@ const Metadata = ({ n, members, relationships, qtimes }) => {
       </tbody>
     </table>
 
-    <h3>Relationships</h3>
+    <h3>All Relationships</h3>
     <PageControls n={n} page={rpage} param_name={"rpage"} base={router.asPath} />
     <table>
       <thead>
@@ -70,7 +70,6 @@ const Metadata = ({ n, members, relationships, qtimes }) => {
       <tbody>
         {
           relationships
-            .filter((doc) => { return doc.type !== "PROVENANCE" })
             .map((doc) => (
               <tr key={doc.id}>
                 <td>{doc.type}</td>
