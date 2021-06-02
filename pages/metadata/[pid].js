@@ -1,19 +1,20 @@
 import { useRouter } from 'next/router'
 import Link from 'next/link'
 import Head from 'next/head'
+
 import Nav from "../../components/nav"
 import PageControls from "../../components/page_controls"
 
 const find_package_url = (pid) => {
-  return 'http://localhost:8983/solr/objects/select/?q=type:package+AND+members:' + pid + '&wt=json'
+  return `http://localhost:8983/solr/objects/select/?q=type:package+AND+members:${pid}&wt=json`
 }
 
 const find_package_members_url = (pid, start) => {
-  return 'http://localhost:8983/solr/objects/select/?q={!join%20from=members%20to=id}id:' + pid + '&wt=json&start=' + start + '&sort=id+asc'
+  return `http://localhost:8983/solr/objects/select/?q={!join%20from=members%20to=id}id:${pid}&start=${start}&sort=id+asc&wt=json`
 }
 
 const find_relationships = (pid, start) => {
-  return 'http://localhost:8983/solr/relationships/select/?q=package_id:' + pid + '&wt=json&start=' + start + '&sort=id+asc'
+  return `http://localhost:8983/solr/relationships/select/?q=package_id:${pid}&start=${start}&sort=id+asc&wt=json`
 }
 
 const Metadata = ({ n, members, relationships }) => {

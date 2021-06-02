@@ -7,9 +7,9 @@ import Nav from '../components/nav'
 import PageControls from "../components/page_controls"
 
 const find_packages_url = function (start) {
-  return 'http://localhost:8983/solr/objects/select/?q=type:METADATA&wt=json' + "&start=" + start
-
+  return `http://localhost:8983/solr/objects/select/?q=type:METADATA&start=${start}&wt=json`
 }
+
 const solr_content_example = JSON.stringify([
   {
     "id": "M1",
@@ -32,13 +32,12 @@ const Home = ({ n, docs }) => {
   const { page } = router.query;
 
   return <div>
+
     <Head>
       <title>Home</title>
       <link rel="stylesheet" href="/static/styles.css" />
     </Head>
-
     <Nav />
-
     <h1>dataone-solr-refactor-demo</h1>
     <p>
       This is a simple demo of a pretty major change to the DataONE search
@@ -57,13 +56,9 @@ const Home = ({ n, docs }) => {
     <p>
       Click on a dataset in the list below to view the associated package.
   </p>
-
     <hr />
-
     <p>Showing {docs.length} dataset(s):</p>
-
     <PageControls n={n} page={page} param_name="page" />
-
     <ul>
       {docs.map((doc) => (
         <li key={doc.id}>
@@ -77,11 +72,9 @@ const Home = ({ n, docs }) => {
 }
 
 Home.getInitialProps = async (req) => {
-  const start = ((req.query.page ? req.query.page : 1) - 1) * 10
-
-  console.log("start is ", start);
+  const start = 0
   const res = await fetch(find_packages_url(start), { "mode": "no-cors" })
-  const json = await res.json()
+  let json = await res.json()
 
   return {
     n: json.response.numFound,
