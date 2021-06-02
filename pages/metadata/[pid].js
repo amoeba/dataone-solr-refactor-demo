@@ -97,11 +97,7 @@ export async function getServerSideProps(context) {
   const start = ((context.query.page ? context.query.page : 1) - 1) * 10
   const relationship_start = ((context.query.rpage ? context.query.rpage : 1) - 1) * 10
 
-
   // Find package members
-
-  console.log("start is ", start)
-
   const package_pid = json.response.docs[0].id
   const pkgres = await fetch(find_package_members_url(package_pid, start), fetch_options)
   const pkgjson = await pkgres.json()
