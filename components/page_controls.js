@@ -1,6 +1,6 @@
 import Link from 'next/link'
 
-const PageControls = ({ n, page }) => {
+const PageControls = ({ n, page, param_name }) => {
   page = Number(page)
 
   if (!page) {
@@ -14,7 +14,7 @@ const PageControls = ({ n, page }) => {
 
   if (page > 1) {
     prevControl = <div>
-      <Link href={`?page=[${prev}]`} as={`?page=${prev}`}>
+      <Link href={`?${param_name}=[${prev}]`} as={`?${param_name}=${prev}`}>
         <a>Page {prev}</a>
       </Link>
     </div>
@@ -24,9 +24,9 @@ const PageControls = ({ n, page }) => {
 
   let nextControl = null;
 
-  if (page * 10 < n ) {
+  if (page * 10 < n) {
     nextControl = <div>
-      <Link href={`?page=[${next}]`} as={`?page=${next}`}>
+      <Link href={`?${param_name}=[${next}]`} as={`?${param_name}=${next}`}>
         <a>Page {next}</a>
       </Link>
     </div>

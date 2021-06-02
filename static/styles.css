@@ -7,7 +7,7 @@ body {
 
 code,
 pre {
-  font-size: 100%;
+  font-size: inherit;
 }
 
 ul,
@@ -38,4 +38,15 @@ pre {
   margin-right: 0rem;
   width: 5rem;
   text-align: center;
+}
+
+nav ul {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+}
+
+nav ul a,
+nav ul a:visited {
+  color: blue;
 }

@@ -8,18 +8,17 @@ const find_package_url = (pid) => {
   return 'http://localhost:8983/solr/objects/select/?q=type:package+AND+members:' + pid + '&wt=json'
 }
 
-const find_package_members_url = ( pid, start ) => {
-  return 'http://localhost:8983/solr/objects/select/?q={!join%20from=members%20to=id}id:'+pid+'&wt=json&start=' + start + '&sort=type+desc,id+asc'
+const find_package_members_url = (pid, start) => {
+  return 'http://localhost:8983/solr/objects/select/?q={!join%20from=members%20to=id}id:' + pid + '&wt=json&start=' + start + '&sort=id+asc'
 }
 
-const find_relationships = ( pid ) => {
-  return 'http://localhost:8983/solr/relationships/select/?q=package_id:' + pid
+const find_relationships = (pid, start) => {
+  return 'http://localhost:8983/solr/relationships/select/?q=package_id:' + pid + '&wt=json&start=' + start + '&sort=id+asc'
 }
 
 const Metadata = ({ n, members, relationships }) => {
   const router = useRouter()
-  const { pid, page } = router.query
-
+  const { pid, page, rpage } = router.query
   return <div>
     <Head>
       <title>Dataset {pid}</title>
@@ -33,8 +32,7 @@ const Metadata = ({ n, members, relationships }) => {
     </Link>
 
     <h3>Files ({n} total)</h3>
-    <PageControls n={n} page={page}/>
-
+    <PageControls n={n} page={page} param_name="page" />
     <table>
       <thead>
         <tr>
@@ -56,10 +54,12 @@ const Metadata = ({ n, members, relationships }) => {
       </tbody>
     </table>
 
-    <h3>Provenance</h3>
+    <h3>Relationships</h3>
+    <PageControls n={n} page={rpage} param_name={"rpage"} />
     <table>
       <thead>
         <tr>
+          <th>Type</th>
           <th>Subject</th>
           <th>Predicate</th>
           <th>Object</th>
@@ -68,71 +68,44 @@ const Metadata = ({ n, members, relationships }) => {
       <tbody>
         {
           relationships
-            .filter((doc) => { return doc.type === "provenance" })
+            .filter((doc) => { return doc.type !== "PROVENANCE" })
             .map((doc) => (
               <tr key={doc.id}>
+                <td>{doc.type}</td>
                 <td>{doc.subject}</td>
                 <td>{doc.predicate}</td>
                 <td>{doc.object}</td>
               </tr>
             )
-          )
-        }
-      </tbody>
-    </table>
-
-    <h3>Other relationships</h3>
-    <table>
-      <thead>
-        <tr>
-          <th>Subject</th>
-          <th>Predicate</th>
-          <th>Object</th>
-        </tr>
-      </thead>
-      <tbody>
-        {
-          relationships
-            .filter((doc) => { return doc.type !== "provenance" })
-            .map((doc) => (
-              <tr key={doc.id}>
-                <td>{doc.subject}</td>
-                <td>{doc.predicate}</td>
-                <td>{doc.object}</td>
-              </tr>
             )
-          )
         }
       </tbody>
     </table>
   </div>
 }
 
-Metadata.getInitialProps = async ( req ) => {
+Metadata.getInitialProps = async (req) => {
   // Find package
   const metadata_pid = req.query.pid
-  const res = await fetch(find_package_url(metadata_pid))
+  const res = await fetch(find_package_url(metadata_pid), { "mode": "no-cors" })
   const json = await res.json()
 
   // Find package members
   const start = ((req.query.page ? req.query.page : 1) - 1) * 10
+  const relationship_start = ((req.query.rpage ? req.query.rpage : 1) - 1) * 10
   const package_pid = json.response.docs[0].id
-  const pkgres = await fetch(find_package_members_url(package_pid, start))
+  const pkgres = await fetch(find_package_members_url(package_pid, start), { "mode": "no-cors" })
   const pkgjson = await pkgres.json()
 
   // Find relationships
-  const relationshipres = await fetch(find_relationships(package_pid))
+  const relationshipres = await fetch(find_relationships(package_pid, relationship_start), { "mode": "no-cors" })
   const relationshipjson = await relationshipres.json()
 
   return {
     n: pkgjson.response.numFound,
     members: pkgjson.response.docs,
-    relationships: relationshipjson.response.docs
+    relationships: typeof relationshipjson.response === "undefined" ? [] : relationshipjson.response.docs
   }
-}
-
-Metadata.componentDidMount = async ( req ) => {
-  console.log("[pid].componentDidMount")
 }
 
 export default Metadata

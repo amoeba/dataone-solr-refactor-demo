@@ -5,7 +5,8 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start"
+    "start": "next start",
+    "build-index": "node scripts/build_index.js"
   },
   "dependencies": {
     "isomorphic-fetch": "^2.2.1",
@@ -13,5 +14,9 @@
     "next": "9.0.7",
     "react": "16.10.1",
     "react-dom": "16.10.1"
+  },
+  "devDependencies": {
+    "log4js": "^6.3.0",
+    "solr-node": "^1.2.1"
   }
 }

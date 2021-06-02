@@ -10,24 +10,6 @@ const Nav = () => (
         </Link>
       </li>
     </ul>
-
-    <style jsx>{`
-      ul {
-        display: flex;
-        justify-content: space-between;
-      }
-      nav > ul {
-        padding: 0;
-        padding: 0;
-      }
-      li {
-        display: flex;
-      }
-      a {
-        color: blue;
-        text-decoration: none;
-      }
-    `}</style>
   </nav>
 )
 
