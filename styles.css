@@ -50,3 +50,7 @@ nav ul a,
 nav ul a:visited {
   color: blue;
 }
+
+.controls > div {
+  width: 5em;
+}
