@@ -4,6 +4,7 @@ import Head from 'next/head'
 
 import Nav from "../../components/nav"
 import PageControls from "../../components/page_controls"
+import { fetch_options } from "../../constants"
 
 const find_package_url = (pid) => {
   return `http://localhost:8983/solr/objects/select/?q=type:package+AND+members:${pid}&wt=json`
@@ -33,7 +34,7 @@ const Metadata = ({ n, members, relationships }) => {
     </Link>
 
     <h3>Files ({n} total)</h3>
-    <PageControls n={n} page={page} param_name="page" />
+    <PageControls n={n} page={page} param_name="page" base={router.asPath} />
     <table>
       <thead>
         <tr>
@@ -56,7 +57,7 @@ const Metadata = ({ n, members, relationships }) => {
     </table>
 
     <h3>Relationships</h3>
-    <PageControls n={n} page={rpage} param_name={"rpage"} />
+    <PageControls n={n} page={rpage} param_name={"rpage"} base={router.asPath} />
     <table>
       <thead>
         <tr>
@@ -85,28 +86,35 @@ const Metadata = ({ n, members, relationships }) => {
   </div>
 }
 
-Metadata.getInitialProps = async (req) => {
+export default Metadata
+
+export async function getServerSideProps(context) {
   // Find package
-  const metadata_pid = req.query.pid
-  const res = await fetch(find_package_url(metadata_pid), { "mode": "no-cors" })
+  const metadata_pid = context.query.pid
+  const res = await fetch(find_package_url(metadata_pid), fetch_options)
   const json = await res.json()
 
+  const start = ((context.query.page ? context.query.page : 1) - 1) * 10
+  const relationship_start = ((context.query.rpage ? context.query.rpage : 1) - 1) * 10
+
+
   // Find package members
-  const start = ((req.query.page ? req.query.page : 1) - 1) * 10
-  const relationship_start = ((req.query.rpage ? req.query.rpage : 1) - 1) * 10
+
+  console.log("start is ", start)
+
   const package_pid = json.response.docs[0].id
-  const pkgres = await fetch(find_package_members_url(package_pid, start), { "mode": "no-cors" })
+  const pkgres = await fetch(find_package_members_url(package_pid, start), fetch_options)
   const pkgjson = await pkgres.json()
 
   // Find relationships
-  const relationshipres = await fetch(find_relationships(package_pid, relationship_start), { "mode": "no-cors" })
+  const relationshipres = await fetch(find_relationships(package_pid, relationship_start), fetch_options)
   const relationshipjson = await relationshipres.json()
 
   return {
-    n: pkgjson.response.numFound,
-    members: pkgjson.response.docs,
-    relationships: typeof relationshipjson.response === "undefined" ? [] : relationshipjson.response.docs
+    props: {
+      n: pkgjson.response.numFound,
+      members: pkgjson.response.docs,
+      relationships: typeof relationshipjson.response === "undefined" ? [] : relationshipjson.response.docs
+    }
   }
 }
-
-export default Metadata

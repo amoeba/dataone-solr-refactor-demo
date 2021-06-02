@@ -1,5 +1,4 @@
 var solr = require('solr-node');
-require('log4js').getLogger('solr-node').level = 'DEBUG';
 
 const n_pkgs = 100
 const pkg_size = 100
@@ -21,17 +20,15 @@ var relationships = new solr({
 
 
 const create_packages = async function () {
-  console.log("create_packages")
-
   for (var i = 1; i < n_pkgs + 1; i++) {
     await create_package(i)
   }
 }
 
 const create_package = async function (index) {
-  console.log("create_package" + index)
-
   package_id = `p${index}`
+
+  console.log(package_id)
 
   data_ids = await create_data_json_for(package_id)
   metadata_id = await create_metadata_json_for(index)
@@ -39,6 +36,9 @@ const create_package = async function (index) {
   await create_package_json_for(package_id, member_ids)
   await create_relationships_for(package_id, member_ids)
   await create_provenance_for(package_id, member_ids)
+
+  await objects.commit()
+  await relationships.commit()
 }
 
 const create_relationships_for = async function (package_id, member_ids) {
@@ -70,7 +70,6 @@ const create_provenance_for = async function (package_id, member_ids) {
 
 const create_metadata_json_for = async function (index) {
   const id = `m${index}`
-  console.log("create_metadata" + id)
 
   metadata_json = {
     "id": id,
@@ -121,14 +120,8 @@ const create_data_json_for = async function (package_id) {
 
 console.log("build_index")
 
-
-
-
-
-
 const main = async function () {
   await create_packages()
-  await objects.commit()
 }
 
 main()

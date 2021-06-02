@@ -5,7 +5,7 @@ import Head from 'next/head'
 import Link from 'next/link'
 import Nav from '../components/nav'
 import PageControls from "../components/page_controls"
-
+import { fetch_options } from "../constants.js"
 const find_packages_url = function (start) {
   return `http://localhost:8983/solr/objects/select/?q=type:METADATA&start=${start}&wt=json`
 }
@@ -32,7 +32,6 @@ const Home = ({ n, docs }) => {
   const { page } = router.query;
 
   return <div>
-
     <Head>
       <title>Home</title>
       <link rel="stylesheet" href="/static/styles.css" />
@@ -58,7 +57,7 @@ const Home = ({ n, docs }) => {
   </p>
     <hr />
     <p>Showing {docs.length} dataset(s):</p>
-    <PageControls n={n} page={page} param_name="page" />
+    <PageControls n={n} page={page} param_name="page" base={router.asPath} />
     <ul>
       {docs.map((doc) => (
         <li key={doc.id}>
@@ -71,15 +70,17 @@ const Home = ({ n, docs }) => {
   </div>
 }
 
-Home.getInitialProps = async (req) => {
-  const start = 0
-  const res = await fetch(find_packages_url(start), { "mode": "no-cors" })
+export default Home
+
+export async function getServerSideProps(context) {
+  const start = ((context.query.page ? context.query.page : 1) - 1) * 10
+  const res = await fetch(find_packages_url(start), fetch_options)
   let json = await res.json()
 
   return {
-    n: json.response.numFound,
-    docs: typeof json.response === "undefined" ? [] : json.response.docs,
+    props: {
+      n: json.response.numFound,
+      docs: typeof json.response === "undefined" ? [] : json.response.docs,
+    }
   }
 }
-
-export default Home

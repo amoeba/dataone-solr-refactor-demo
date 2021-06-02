@@ -1,40 +1,58 @@
 # dataone-solr-refactor-demo
 
-How would building a client-side application for DataONE work if the Solr index was much simpler:
+This is a simple demo of a pretty major change to the DataONE search index. Instead of the Solr documents in a Data Package having a resourceMap field linking the package member to its package:
 
-- One core for Objects
-- One core for Data Packaging relationships
+```json
+[
+  {
+    "id": "M1",
+    "type": "metadata",
+    "name": "My cool dataset"
+  },
+  {
+    "id": "P1",
+    "type": "package",
+    "members": ["M1"]
+  }
+]
+```
+
+we use a Solr join to query for the package members directly:
+
+```
+?q={!join from=members to=id}id:{package_id}
+```
 
 ## Running
 
 ### Pre-requisites
 
-- Node & npm
+- Node & Yarn (npm will work)
 - Solr running on `:8983`
 
 ### Install application dependencies
 
 ```
-npm install
+yarn install
 ```
 
 ### Set up Solr
 
 ```
 solr create -c objects
-solr create -c packages
+solr create -c relationships
 ```
 
 ### Build the Solr index
 
 ```
-npm run build-index
+yarn build-index
 ```
 
 ### Start the server
 
 ```
-npm run dev
+yarn dev
 ```
 
 Visit http://localhost:3000

@@ -14,10 +14,10 @@ const PageControls = ({ n, page, param_name }) => {
 
   if (page > 1) {
     prevControl = <div>
-      <Link href={`?${param_name}=[${prev}]`} as={`?${param_name}=${prev}`}>
+      <Link href={`?${param_name}=${prev}`}>
         <a>Page {prev}</a>
       </Link>
-    </div>
+    </div >
   } else {
     prevControl = <div></div>
   }
@@ -26,12 +26,12 @@ const PageControls = ({ n, page, param_name }) => {
 
   if (page * 10 < n) {
     nextControl = <div>
-      <Link href={`?${param_name}=[${next}]`} as={`?${param_name}=${next}`}>
+      <Link href={`?${param_name}=${next}`}>
         <a>Page {next}</a>
       </Link>
     </div>
   } else {
-    nextControl = <div></div>
+    nextControl = <div>You're at the end :(</div>
   }
 
   return <div className="controls">
